@@ -20,32 +20,45 @@ piece_preview_center = piece_preview_pos + [piece_preview_size[0] / 2, piece_pre
 
 colors = [ [0, 0, 0], [0, 206, 241], [255, 213, 0], [145, 56, 167], [114, 203, 59], [255, 50, 19], [3, 65, 174], [255, 151, 28] ]
 
-# First value is "is key pressed", second is "is key just pressed", second will update 1/60 of a second after the key is pressed
-input_map =
-[ 
-    [ False, False ], # Left
-    [ False, False ], # Right
-    [ False, False ], # Up
-    [ False, False ], # Down
-    [ False, False ], # A
-    [ False, False ], # B
-    [ False, False ]  # Pause
-]
+fps_cap_clock = pygame.time.Clock()
+
+# First bool is "is key pressed", second is "is key just pressed", second will update to false 1/60 of a second after the key is pressed
+# For now, just_pressed goes unused
+input_states = \
+{
+    "Left" : { "pressed": False, "just_pressed": False }, # Left
+    "Right" : { "pressed": False, "just_pressed": False }, # Right
+    "Up" : { "pressed": False, "just_pressed": False }, # Up
+    "Down" : { "pressed": False, "just_pressed": False }, # Down
+    "A" : { "pressed": False, "just_pressed": False }, # A
+    "B" : { "pressed": False, "just_pressed": False }, # B
+    "Pause" : { "pressed": False, "just_pressed": False }  # Pause
+}
+
+# Translate the integer key IDs into the readable strings using this dictionary (can also rebind actions here)
+input_map = \
+{
+    K_a : "Left",
+    K_d : "Right",
+    K_w : "Up",
+    K_s : "Down",
+    K_k : "A",
+    K_j : "B",
+    K_RETURN : "Pause",
+}
 
 # Array of all pieces and all their rotations, stored as offsets in a 4 by 4 grid if an l or O, or a 3 by 3 grid otherwise (follows SRS)
 # Additionally, the 5th value in the list for each piece is the color index
-pieces = 
+pieces = \
 [
-    [ [ [0, 1], [1, 1]. [2, 1], [3, 1] ], [ [2, 0], [2, 1], [2, 2], [2, 3] ], [ [0, 2], [1, 2], [2, 2], [3, 2] ], [ [1, 0], [1, 1], [1, 2], [1, 3] ], 1 ], # l 
-    [ [ [1, 0], [1, 1]. [2, 0], [2, 1] ], [ [1, 0], [1, 1]. [2, 0], [2, 1] ], [ [1, 0], [1, 1]. [2, 0], [2, 1] ], [ [1, 0], [1, 1]. [2, 0], [2, 1] ], 2 ], # O
-    [ [ [1, 0], [0, 1]. [1, 1], [2, 1] ], [ [1, 0], [1, 1], [1, 2], [2, 1] ], [ [0, 1], [1, 1], [2, 1], [1, 2] ], [ [0, 1], [1, 0], [1, 1], [1, 2] ], 3 ], # T
-    [ [ [1, 0], [2, 0]. [0, 1], [1, 1] ], [ [1, 0], [1, 1], [2, 1], [2, 2] ], [ [1, 1], [2, 1], [0, 2], [1, 2] ], [ [0, 0], [0, 1], [1, 1], [1, 2] ], 4 ], # S
-    [ [ [0, 0], [1, 0]. [1, 1], [2, 1] ], [ [1, 1], [1, 2], [2, 0], [2, 1] ], [ [0, 1], [1, 1], [1, 2], [2, 2] ], [ [0, 1], [0, 2], [1, 0], [1, 1] ], 5 ], # Z
-    [ [ [0, 0], [0, 1]. [1, 1], [2, 1] ], [ [1, 0], [2, 0], [1, 1], [1, 2] ], [ [0, 1], [1, 1], [2, 1], [2, 2] ], [ [0, 2], [1, 0], [1, 1], [1, 2] ], 6 ], # J
-    [ [ [2, 0], [0, 1]. [1, 1], [2, 1] ], [ [1, 0], [1, 1], [1, 2], [2, 2] ], [ [0, 1], [1, 1], [2, 1], [0, 2] ], [ [0, 0], [1, 0], [1, 1], [1, 2] ], 7 ]  # L
+    [ [ [0, 1], [1, 1], [2, 1], [3, 1] ], [ [2, 0], [2, 1], [2, 2], [2, 3] ], [ [0, 2], [1, 2], [2, 2], [3, 2] ], [ [1, 0], [1, 1], [1, 2], [1, 3] ], 1 ], # l 
+    [ [ [1, 0], [1, 1], [2, 0], [2, 1] ], [ [1, 0], [1, 1], [2, 0], [2, 1] ], [ [1, 0], [1, 1], [2, 0], [2, 1] ], [ [1, 0], [1, 1], [2, 0], [2, 1] ], 2 ], # O
+    [ [ [1, 0], [0, 1], [1, 1], [2, 1] ], [ [1, 0], [1, 1], [1, 2], [2, 1] ], [ [0, 1], [1, 1], [2, 1], [1, 2] ], [ [0, 1], [1, 0], [1, 1], [1, 2] ], 3 ], # T
+    [ [ [1, 0], [2, 0], [0, 1], [1, 1] ], [ [1, 0], [1, 1], [2, 1], [2, 2] ], [ [1, 1], [2, 1], [0, 2], [1, 2] ], [ [0, 0], [0, 1], [1, 1], [1, 2] ], 4 ], # S
+    [ [ [0, 0], [1, 0], [1, 1], [2, 1] ], [ [1, 1], [1, 2], [2, 0], [2, 1] ], [ [0, 1], [1, 1], [1, 2], [2, 2] ], [ [0, 1], [0, 2], [1, 0], [1, 1] ], 5 ], # Z
+    [ [ [0, 0], [0, 1], [1, 1], [2, 1] ], [ [1, 0], [2, 0], [1, 1], [1, 2] ], [ [0, 1], [1, 1], [2, 1], [2, 2] ], [ [0, 2], [1, 0], [1, 1], [1, 2] ], 6 ], # J
+    [ [ [2, 0], [0, 1], [1, 1], [2, 1] ], [ [1, 0], [1, 1], [1, 2], [2, 2] ], [ [0, 1], [1, 1], [2, 1], [0, 2] ], [ [0, 0], [1, 0], [1, 1], [1, 2] ], 7 ]  # L
 ]
-
-create_background()
 
 # All game logic initializations go here, so the game can be restarted and such
 def init_game():
@@ -64,25 +77,16 @@ def create_play_area():
         for col in range(play_area_size[1]):
             play_area[row].append(0)
 
-def events():
+def event_handler():
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
-        if event.type == pygame.KEYDOWN:
-            if event.key == K_a: #Left
-                pass 
-            elif event.key == K_d: #Right
-                pass 
-            elif event.key == K_w: #Up
-                pass 
-            elif event.key == K_s: #Down
-                pass 
-            elif event.key == K_k: #A Button (Spin Clockwise)
-                pass 
-            elif event.key == K_j: #B Button (Spin Counter-Clockwise)
-                pass
-            elif event.key == K_RETURN:
-                pass
+        elif event.type == pygame.KEYDOWN:
+            pressed_key = input_map[event.key]
+            input_states[pressed_key]["pressed"] = True
+        elif event.type == pygame.KEYUP:
+            released_key = input_map[event.key]
+            input_states[pressed_key]["pressed"] = False
 
 def update():
     pass 
@@ -110,14 +114,18 @@ def draw():
 
     pygame.display.flip()
 
-play_area[20][4] = 1
+create_background()
 
 init_game()
 
+play_area[20][4] = 1
+
 # Main loop
 while True:
-    events()
+    event_handler()
 
     update()
 
     draw()
+
+    fps_cap_clock.tick(60)
