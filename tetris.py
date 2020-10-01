@@ -1,5 +1,7 @@
 import sys
 import pygame
+from pygame.locals import *
+
 pygame.init()
 
 window_size = [1280, 720]
@@ -18,6 +20,37 @@ piece_preview_center = piece_preview_pos + [piece_preview_size[0] / 2, piece_pre
 
 colors = [ [0, 0, 0], [0, 206, 241], [255, 213, 0], [145, 56, 167], [114, 203, 59], [255, 50, 19], [3, 65, 174], [255, 151, 28] ]
 
+# First value is "is key pressed", second is "is key just pressed", second will update 1/60 of a second after the key is pressed
+input_map =
+[ 
+    [ False, False ], # Left
+    [ False, False ], # Right
+    [ False, False ], # Up
+    [ False, False ], # Down
+    [ False, False ], # A
+    [ False, False ], # B
+    [ False, False ]  # Pause
+]
+
+# Array of all pieces and all their rotations, stored as offsets in a 4 by 4 grid if an l or O, or a 3 by 3 grid otherwise (follows SRS)
+# Additionally, the 5th value in the list for each piece is the color index
+pieces = 
+[
+    [ [ [0, 1], [1, 1]. [2, 1], [3, 1] ], [ [2, 0], [2, 1], [2, 2], [2, 3] ], [ [0, 2], [1, 2], [2, 2], [3, 2] ], [ [1, 0], [1, 1], [1, 2], [1, 3] ], 1 ], # l 
+    [ [ [1, 0], [1, 1]. [2, 0], [2, 1] ], [ [1, 0], [1, 1]. [2, 0], [2, 1] ], [ [1, 0], [1, 1]. [2, 0], [2, 1] ], [ [1, 0], [1, 1]. [2, 0], [2, 1] ], 2 ], # O
+    [ [ [1, 0], [0, 1]. [1, 1], [2, 1] ], [ [1, 0], [1, 1], [1, 2], [2, 1] ], [ [0, 1], [1, 1], [2, 1], [1, 2] ], [ [0, 1], [1, 0], [1, 1], [1, 2] ], 3 ], # T
+    [ [ [1, 0], [2, 0]. [0, 1], [1, 1] ], [ [1, 0], [1, 1], [2, 1], [2, 2] ], [ [1, 1], [2, 1], [0, 2], [1, 2] ], [ [0, 0], [0, 1], [1, 1], [1, 2] ], 4 ], # S
+    [ [ [0, 0], [1, 0]. [1, 1], [2, 1] ], [ [1, 1], [1, 2], [2, 0], [2, 1] ], [ [0, 1], [1, 1], [1, 2], [2, 2] ], [ [0, 1], [0, 2], [1, 0], [1, 1] ], 5 ], # Z
+    [ [ [0, 0], [0, 1]. [1, 1], [2, 1] ], [ [1, 0], [2, 0], [1, 1], [1, 2] ], [ [0, 1], [1, 1], [2, 1], [2, 2] ], [ [0, 2], [1, 0], [1, 1], [1, 2] ], 6 ], # J
+    [ [ [2, 0], [0, 1]. [1, 1], [2, 1] ], [ [1, 0], [1, 1], [1, 2], [2, 2] ], [ [0, 1], [1, 1], [2, 1], [0, 2] ], [ [0, 0], [1, 0], [1, 1], [1, 2] ], 7 ]  # L
+]
+
+create_background()
+
+# All game logic initializations go here, so the game can be restarted and such
+def init_game():
+    create_play_area()
+
 # Draw Background (to be copied to the main screen every frame)
 def create_background():
     for row in range(int(play_area_size[0] / 2)):
@@ -31,8 +64,25 @@ def create_play_area():
         for col in range(play_area_size[1]):
             play_area[row].append(0)
 
-def inputs():
-    pass 
+def events():
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            sys.exit()
+        if event.type == pygame.KEYDOWN:
+            if event.key == K_a: #Left
+                pass 
+            elif event.key == K_d: #Right
+                pass 
+            elif event.key == K_w: #Up
+                pass 
+            elif event.key == K_s: #Down
+                pass 
+            elif event.key == K_k: #A Button (Spin Clockwise)
+                pass 
+            elif event.key == K_j: #B Button (Spin Counter-Clockwise)
+                pass
+            elif event.key == K_RETURN:
+                pass
 
 def update():
     pass 
@@ -60,15 +110,14 @@ def draw():
 
     pygame.display.flip()
 
-create_background()
-create_play_area()
+play_area[20][4] = 1
 
-play_area[35][4] = 1
+init_game()
 
 # Main loop
 while True:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            sys.exit()
+    events()
+
+    update()
 
     draw()
