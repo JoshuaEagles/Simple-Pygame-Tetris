@@ -39,14 +39,15 @@ piece_preview_center = piece_preview_pos + [piece_preview_size[0] / 2, piece_pre
 
 colors = [ [0, 0, 0], [0, 206, 241], [255, 213, 0], [145, 56, 167], [114, 203, 59], [255, 50, 19], [3, 65, 174], [255, 151, 28] ]
 
-fps_cap_clock = pygame.time.Clock()
+clock = pygame.time.Clock()
+
+# each timer should be a list of 2 items, the first being the wait time, the second being the callback
+timers = []
 
 # variables for the currently moving piece
 piece_pos = [0, 0] # relative to the play area
 piece_index = 0
 piece_rotation = 0
-
-test = 0
 
 # First bool is "is key pressed", second is "is key just pressed", second will update to false 1/60 of a second after the key is pressed
 # For now, just_pressed goes unused
@@ -124,17 +125,16 @@ def event_handler():
                 released_key = input_map[event.key]
                 input_states[released_key]["pressed"] = False
 
-def update():
-    global test
-    if test < 10:
-        test = test + 1
-        return 
-    test = 0
+def update(delta):
+    for timer in timers:
+        update_timer(delta, timer)
 
-    if not piece_pos[1] >= 38:
-        remove_piece_tiles()
-        piece_pos[1] = piece_pos[1] + 1
-        insert_piece_tiles()
+def update_piece_pos():
+    remove_piece_tiles()
+    piece_pos[1] = piece_pos[1] + 1
+    insert_piece_tiles()
+    if piece_pos[1] < 38:
+        timers.append([0.5, update_piece_pos])
     
 def draw():
     screen.fill(pygame.Color(0, 0, 0))
@@ -167,17 +167,27 @@ def insert_piece_tiles():
 def remove_piece_tiles():
     for tile in pieces[piece_index][piece_rotation]:
         play_area[piece_pos[0] + tile[0]][piece_pos[1] + tile[1]] = 0
+
+def update_timer(delta, timer):
+    timer[0] -= delta 
+    if timer[0] <= 0:
+        timer[1]()
+        timers.remove(timer)
     
 create_background()
 
 init_game()
 
+update_piece_pos()
+
 # Main loop
 while True:
+    delta = clock.get_time() / 1000 # delta in seconds
+
     event_handler()
 
-    update()
+    update(delta)
 
     draw()
 
-    fps_cap_clock.tick(60)
+    clock.tick(60)
