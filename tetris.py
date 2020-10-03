@@ -1,13 +1,30 @@
 import sys
 import pygame
-from pygame.locals import *
+# pylint: disable=no-name-in-module
+from pygame.locals import (
+    K_a, 
+    K_d, 
+    K_w, 
+    K_s, 
+    K_k, 
+    K_j, 
+    K_RETURN,
+    QUIT,
+    KEYDOWN,
+    KEYUP
+)
+# pylint: enable=no-name-in-module
 
+# pylint: disable=no-member
 pygame.init()
+# pylint: enable=no-member
 
 window_size = [1280, 720]
 
 screen = pygame.display.set_mode(window_size)
+# pylint: disable=too-many-function-args
 background = pygame.Surface(window_size)
+# pylint: enable=too-many-function-args
 
 play_area = []
 play_area_size = [40, 10]
@@ -74,19 +91,21 @@ def create_background():
 def create_play_area():
     for row in range(play_area_size[0]):
         play_area.append([])
-        for col in range(play_area_size[1]):
+        for _col in range(play_area_size[1]):
             play_area[row].append(0)
 
 def event_handler():
     for event in pygame.event.get():
-        if event.type == pygame.QUIT:
+        if event.type == QUIT:
             sys.exit()
-        elif event.type == pygame.KEYDOWN:
-            pressed_key = input_map[event.key]
-            input_states[pressed_key]["pressed"] = True
-        elif event.type == pygame.KEYUP:
-            released_key = input_map[event.key]
-            input_states[pressed_key]["pressed"] = False
+        elif event.type == KEYDOWN:
+            if event.key in input_map:
+                pressed_key = input_map[event.key]
+                input_states[pressed_key]["pressed"] = True
+        elif event.type == KEYUP:
+            if event.key in input_map:
+                released_key = input_map[event.key]
+                input_states[released_key]["pressed"] = False
 
 def update():
     pass 
