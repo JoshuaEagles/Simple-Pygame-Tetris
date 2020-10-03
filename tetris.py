@@ -1,9 +1,6 @@
-# TODO: input improvements
-# TODO: line clears
 # TODO: piece preview 
 # TODO: level 
 # TODO: score and line clear count
-# TODO: some basic sound perhaps?
 import sys
 import random
 import pygame
@@ -106,16 +103,6 @@ def init_game():
 
     insert_new_piece()
 
-def insert_new_piece():
-    global piece_index, piece_pos, piece_rotation
-
-    piece_index = random.randrange(0, 6)
-    piece_pos = pieces[piece_index][5].copy()
-    piece_rotation = 0
-
-    insert_piece_tiles()
-    update_piece_pos(False)
-
 # Draw Background (to be copied to the main screen every frame)
 def create_background():
     background.fill([0, 0, 0, 0])
@@ -190,6 +177,7 @@ def update_piece_pos(lock = True):
     piece_moved_down = piece_attempt_move([0, 1])
     if lock and not piece_moved_down:
         insert_piece_tiles()
+        attempt_line_clears()
         insert_new_piece()
         return
 
@@ -217,6 +205,16 @@ def draw():
     screen.blit(background, [0, 0])
 
     pygame.display.flip()
+
+def insert_new_piece():
+    global piece_index, piece_pos, piece_rotation
+
+    piece_index = random.randrange(0, 6)
+    piece_pos = pieces[piece_index][5].copy()
+    piece_rotation = 0
+
+    insert_piece_tiles()
+    update_piece_pos(False)
 
 # insert tiles for the current piece so it displays on the grid
 def insert_piece_tiles():
@@ -261,7 +259,34 @@ def tile_collision_check(tile_pos):
     if tile_pos[0] > play_area_size[0] - 1 or tile_pos[0] < 0 or tile_pos[1] > play_area_size[1] - 1 or tile_pos[1] < 0:
         return True
     return play_area[tile_pos[0]][tile_pos[1]] != 0
-    
+
+# called when locking a piece, checks for line clears, and clears them if found
+def attempt_line_clears():
+    # to make sure we clear lines from the top down and only check for clears once per row, add only distinct row positions to an array and sort them
+    rows_to_check = []
+
+    for tile_pos in pieces[piece_index][piece_rotation]:
+        if tile_pos[1] not in rows_to_check:
+            rows_to_check.append(tile_pos[1])
+    rows_to_check.sort()
+
+    def check_if_row_filled(row):
+        for col in range(play_area_size[0]):
+            if play_area[col][row + piece_pos[1]] == 0: 
+                return
+            elif col == play_area_size[0] - 1: # at the end of the column and no empty tiles
+                shift_play_area_down(row + piece_pos[1])
+
+    for row in rows_to_check:
+        check_if_row_filled(row)
+
+# this shifts all the tiles above a specified row down 1 tile
+# index 39 is the very bottom of the play area
+def shift_play_area_down(cleared_row):
+    for col in range(play_area_size[0]):
+        for row in range(cleared_row, 0, -1):
+            play_area[col][row] = play_area[col][row - 1]
+
 create_background()
 
 init_game()
