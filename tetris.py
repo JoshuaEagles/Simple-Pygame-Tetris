@@ -53,38 +53,38 @@ piece_rotation = 0
 # For now, just_pressed goes unused
 input_states = \
 {
-    "Left" : { "pressed": False, "just_pressed": False }, # Left
-    "Right" : { "pressed": False, "just_pressed": False }, # Right
-    "Up" : { "pressed": False, "just_pressed": False }, # Up
-    "Down" : { "pressed": False, "just_pressed": False }, # Down
-    "A" : { "pressed": False, "just_pressed": False }, # A
-    "B" : { "pressed": False, "just_pressed": False }, # B
-    "Pause" : { "pressed": False, "just_pressed": False }  # Pause
+    "left" : { "pressed": False, "just_pressed": False }, # Left
+    "right" : { "pressed": False, "just_pressed": False }, # Right
+    "up" : { "pressed": False, "just_pressed": False }, # Up
+    "down" : { "pressed": False, "just_pressed": False }, # Down
+    "a" : { "pressed": False, "just_pressed": False }, # A
+    "b" : { "pressed": False, "just_pressed": False }, # B
+    "pause" : { "pressed": False, "just_pressed": False }  # Pause
 }
 
 # Translate the integer key IDs into the readable strings using this dictionary (can also rebind actions here)
 input_map = \
 {
-    K_a : "Left",
-    K_d : "Right",
-    K_w : "Up",
-    K_s : "Down",
-    K_k : "A",
-    K_j : "B",
-    K_RETURN : "Pause",
+    K_a : "left",
+    K_d : "right",
+    K_w : "up",
+    K_s : "down",
+    K_k : "a",
+    K_j : "b",
+    K_RETURN : "pause",
 }
 
 # Array of all pieces and all their rotations, stored as offsets in a 4 by 4 grid if an l or O, or a 3 by 3 grid otherwise (follows SRS)
 # Additionally, and the 5th value in the list for each piece is the color index, and the 6th is their start position
 pieces = \
 [
-    [ [ [0, 1], [1, 1], [2, 1], [3, 1] ], [ [2, 0], [2, 1], [2, 2], [2, 3] ], [ [0, 2], [1, 2], [2, 2], [3, 2] ], [ [1, 0], [1, 1], [1, 2], [1, 3] ], 1, [3, 19] ], # l 
-    [ [ [1, 0], [1, 1], [2, 0], [2, 1] ], [ [1, 0], [1, 1], [2, 0], [2, 1] ], [ [1, 0], [1, 1], [2, 0], [2, 1] ], [ [1, 0], [1, 1], [2, 0], [2, 1] ], 2, [4, 19]], # O
-    [ [ [1, 0], [0, 1], [1, 1], [2, 1] ], [ [1, 0], [1, 1], [1, 2], [2, 1] ], [ [0, 1], [1, 1], [2, 1], [1, 2] ], [ [0, 1], [1, 0], [1, 1], [1, 2] ], 3, [3, 20]], # T
-    [ [ [1, 0], [2, 0], [0, 1], [1, 1] ], [ [1, 0], [1, 1], [2, 1], [2, 2] ], [ [1, 1], [2, 1], [0, 2], [1, 2] ], [ [0, 0], [0, 1], [1, 1], [1, 2] ], 4, [3, 20]], # S
-    [ [ [0, 0], [1, 0], [1, 1], [2, 1] ], [ [1, 1], [1, 2], [2, 0], [2, 1] ], [ [0, 1], [1, 1], [1, 2], [2, 2] ], [ [0, 1], [0, 2], [1, 0], [1, 1] ], 5, [3, 20]], # Z
-    [ [ [0, 0], [0, 1], [1, 1], [2, 1] ], [ [1, 0], [2, 0], [1, 1], [1, 2] ], [ [0, 1], [1, 1], [2, 1], [2, 2] ], [ [0, 2], [1, 0], [1, 1], [1, 2] ], 6, [3, 20]], # J
-    [ [ [2, 0], [0, 1], [1, 1], [2, 1] ], [ [1, 0], [1, 1], [1, 2], [2, 2] ], [ [0, 1], [1, 1], [2, 1], [0, 2] ], [ [0, 0], [1, 0], [1, 1], [1, 2] ], 7, [3, 20]]  # L
+    [ [ [0, 1], [1, 1], [2, 1], [3, 1] ], [ [2, 0], [2, 1], [2, 2], [2, 3] ], [ [0, 2], [1, 2], [2, 2], [3, 2] ], [ [1, 0], [1, 1], [1, 2], [1, 3] ], 1, [3, 18] ], # l 
+    [ [ [1, 0], [1, 1], [2, 0], [2, 1] ], [ [1, 0], [1, 1], [2, 0], [2, 1] ], [ [1, 0], [1, 1], [2, 0], [2, 1] ], [ [1, 0], [1, 1], [2, 0], [2, 1] ], 2, [4, 18]], # O
+    [ [ [1, 0], [0, 1], [1, 1], [2, 1] ], [ [1, 0], [1, 1], [1, 2], [2, 1] ], [ [0, 1], [1, 1], [2, 1], [1, 2] ], [ [0, 1], [1, 0], [1, 1], [1, 2] ], 3, [3, 19]], # T
+    [ [ [1, 0], [2, 0], [0, 1], [1, 1] ], [ [1, 0], [1, 1], [2, 1], [2, 2] ], [ [1, 1], [2, 1], [0, 2], [1, 2] ], [ [0, 0], [0, 1], [1, 1], [1, 2] ], 4, [3, 19]], # S
+    [ [ [0, 0], [1, 0], [1, 1], [2, 1] ], [ [1, 1], [1, 2], [2, 0], [2, 1] ], [ [0, 1], [1, 1], [1, 2], [2, 2] ], [ [0, 1], [0, 2], [1, 0], [1, 1] ], 5, [3, 19]], # Z
+    [ [ [0, 0], [0, 1], [1, 1], [2, 1] ], [ [1, 0], [2, 0], [1, 1], [1, 2] ], [ [0, 1], [1, 1], [2, 1], [2, 2] ], [ [0, 2], [1, 0], [1, 1], [1, 2] ], 6, [3, 19]], # J
+    [ [ [2, 0], [0, 1], [1, 1], [2, 1] ], [ [1, 0], [1, 1], [1, 2], [2, 2] ], [ [0, 1], [1, 1], [2, 1], [0, 2] ], [ [0, 0], [1, 0], [1, 1], [1, 2] ], 7, [3, 19]]  # L
 ]
 
 # All game logic initializations go here, so the game can be restarted and such
@@ -92,11 +92,14 @@ def init_game():
     global piece_index, piece_pos, piece_rotation
     create_play_area()
 
-    piece_index = 0#random.randrange(0, 6)
+    random.seed()
+
+    piece_index = random.randrange(0, 6)
     piece_pos = pieces[piece_index][5]
     piece_rotation = 0
 
     insert_piece_tiles()
+    update_piece_pos()
 
 # Draw Background (to be copied to the main screen every frame)
 def create_background():
@@ -131,10 +134,16 @@ def update(delta):
 
 def update_piece_pos():
     remove_piece_tiles()
-    piece_pos[1] = piece_pos[1] + 1
+
+    piece_attempt_move([0, 1])
+
+    if input_states["right"]["pressed"]:
+        piece_attempt_move([1, 0])
+    if input_states["left"]["pressed"]:
+        piece_attempt_move([-1, 0])
+
     insert_piece_tiles()
-    if piece_pos[1] < 38:
-        timers.append([0.5, update_piece_pos])
+    timers.append([0.5, update_piece_pos])
     
 def draw():
     screen.fill(pygame.Color(0, 0, 0))
@@ -173,12 +182,26 @@ def update_timer(delta, timer):
     if timer[0] <= 0:
         timer[1]()
         timers.remove(timer)
+
+# returns true if the move was successful
+def piece_attempt_move(move_dir):
+    for tile in pieces[piece_index][piece_rotation]:
+        if tile_collision_check([piece_pos[0] + tile[0] + move_dir[0], piece_pos[1] + tile[1] + move_dir[1]]):
+            return False
+    piece_pos[0] = piece_pos[0] + move_dir[0]
+    piece_pos[1] = piece_pos[1] + move_dir[1]
+    return True
+
+# returns true if a collision occured
+def tile_collision_check(tile_pos):
+    # if out of bounds or the tile in the play area isn't empty, we have collided
+    if tile_pos[0] > play_area_size[0] - 1 or tile_pos[0] < 0 or tile_pos[1] > play_area_size[1] - 1 or tile_pos[1] < 0:
+        return True
+    return play_area[tile_pos[0]][tile_pos[1]] != 0
     
 create_background()
 
 init_game()
-
-update_piece_pos()
 
 # Main loop
 while True:
