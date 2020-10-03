@@ -1,4 +1,5 @@
 import sys
+import random
 import pygame
 # pylint: disable=no-name-in-module
 from pygame.locals import (
@@ -11,7 +12,8 @@ from pygame.locals import (
     K_RETURN,
     QUIT,
     KEYDOWN,
-    KEYUP
+    KEYUP,
+    SRCALPHA
 )
 # pylint: enable=no-name-in-module
 
@@ -23,7 +25,7 @@ window_size = [1280, 720]
 
 screen = pygame.display.set_mode(window_size)
 # pylint: disable=too-many-function-args
-background = pygame.Surface(window_size)
+background = pygame.Surface(window_size, SRCALPHA)
 # pylint: enable=too-many-function-args
 
 play_area = []
@@ -43,6 +45,8 @@ fps_cap_clock = pygame.time.Clock()
 piece_pos = [0, 0] # relative to the play area
 piece_index = 0
 piece_rotation = 0
+
+test = 0
 
 # First bool is "is key pressed", second is "is key just pressed", second will update to false 1/60 of a second after the key is pressed
 # For now, just_pressed goes unused
@@ -84,10 +88,18 @@ pieces = \
 
 # All game logic initializations go here, so the game can be restarted and such
 def init_game():
+    global piece_index, piece_pos, piece_rotation
     create_play_area()
+
+    piece_index = 0#random.randrange(0, 6)
+    piece_pos = pieces[piece_index][5]
+    piece_rotation = 0
+
+    insert_piece_tiles()
 
 # Draw Background (to be copied to the main screen every frame)
 def create_background():
+    background.fill([0, 0, 0, 0])
     for col in range(play_area_size[0]):
         for row in range(int(play_area_size[1] / 2)):
             pygame.draw.rect(background, [255, 255, 255], [drawn_grid_pos[0] + col * drawn_tile_size[0], drawn_grid_pos[1] + row * drawn_tile_size[1]] + drawn_tile_size, 1)
@@ -113,20 +125,28 @@ def event_handler():
                 input_states[released_key]["pressed"] = False
 
 def update():
-    pass 
+    global test
+    if test < 10:
+        test = test + 1
+        return 
+    test = 0
 
+    if not piece_pos[1] >= 38:
+        remove_piece_tiles()
+        piece_pos[1] = piece_pos[1] + 1
+        insert_piece_tiles()
+    
 def draw():
     screen.fill(pygame.Color(0, 0, 0))
 
     # Drawing tiles at their location
+    screen.lock()
     for col in range(play_area_size[0]):
         for row in range(int(play_area_size[1] / 2)):
             tile_color_index = play_area[col][row + 20]
             tile_color = colors[tile_color_index]
-            if tile_color_index == 0:
-                continue
-            else: 
-                pygame.draw.rect(background, tile_color, [drawn_grid_pos[0] + col * drawn_tile_size[0], drawn_grid_pos[1] + row * drawn_tile_size[1]] + drawn_tile_size)
+            pygame.draw.rect(screen, tile_color, [drawn_grid_pos[0] + col * drawn_tile_size[0], drawn_grid_pos[1] + row * drawn_tile_size[1]] + drawn_tile_size)
+    screen.unlock()
 
     # Piece Preview - TODO
 
@@ -151,12 +171,6 @@ def remove_piece_tiles():
 create_background()
 
 init_game()
-
-piece_index = 0
-piece_rotation = 0
-piece_pos = pieces[piece_index][5]
-
-insert_piece_tiles()
 
 # Main loop
 while True:
