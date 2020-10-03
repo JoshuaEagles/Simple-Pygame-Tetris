@@ -41,7 +41,7 @@ colors = [ [0, 0, 0], [0, 206, 241], [255, 213, 0], [145, 56, 167], [114, 203, 5
 
 clock = pygame.time.Clock()
 
-# each timer should be a list of 2 items, the first being the wait time, the second being the callback
+# each timer should be a list of 2 items, the first being the wait time, the second being the callback, third if False makes the timer an interval (doesn't expire)
 timers = []
 
 # variables for the currently moving piece
@@ -49,17 +49,17 @@ piece_pos = [0, 0] # relative to the play area
 piece_index = 0
 piece_rotation = 0
 
-# First bool is "is key pressed", second is "is key just pressed", second will update to false 1/60 of a second after the key is pressed
+# First bool is "is key pressed", second is "is key just pressed", second will update to false 1/60 of a second after the key is pressed, third is a reference to the timer if created
 # For now, just_pressed goes unused
 input_states = \
 {
-    "left" : { "pressed": False, "just_pressed": False }, # Left
-    "right" : { "pressed": False, "just_pressed": False }, # Right
-    "up" : { "pressed": False, "just_pressed": False }, # Up
-    "down" : { "pressed": False, "just_pressed": False }, # Down
-    "a" : { "pressed": False, "just_pressed": False }, # A
-    "b" : { "pressed": False, "just_pressed": False }, # B
-    "pause" : { "pressed": False, "just_pressed": False }  # Pause
+    "left" : { "pressed": False, "just_pressed": False, "timer": None}, # Left
+    "right" : { "pressed": False, "just_pressed": False, "timer": None }, # Right
+    "up" : { "pressed": False, "just_pressed": False, "timer": None }, # Up
+    "down" : { "pressed": False, "just_pressed": False, "timer": None }, # Down
+    "a" : { "pressed": False, "just_pressed": False, "timer": None }, # A
+    "b" : { "pressed": False, "just_pressed": False, "timer": None }, # B
+    "pause" : { "pressed": False, "just_pressed": False, "timer": None }  # Pause
 }
 
 # Translate the integer key IDs into the readable strings using this dictionary (can also rebind actions here)
@@ -124,7 +124,7 @@ def event_handler():
     for event in pygame.event.get():
         if event.type == QUIT:
             sys.exit()
-        elif event.type == KEYDOWN:
+        elif event.type == KEYDOWN: # TODO: just pressed
             if event.key in input_map:
                 pressed_key = input_map[event.key]
                 input_states[pressed_key]["pressed"] = True
@@ -138,17 +138,24 @@ def update(delta):
         update_timer(delta, timer)
 
 def update_piece_pos(lock = True):
+    global piece_rotation
+
     remove_piece_tiles()
 
-    if lock and not piece_attempt_move([0, 1]):
+    piece_moved_down = piece_attempt_move([0, 1])
+    if lock and not piece_moved_down:
         insert_piece_tiles()
         insert_new_piece()
         return
 
     if input_states["right"]["pressed"]:
         piece_attempt_move([1, 0])
-    if input_states["left"]["pressed"]:
+    elif input_states["left"]["pressed"]:
         piece_attempt_move([-1, 0])
+    elif input_states["a"]["pressed"]:
+        piece_attempt_rotate((piece_rotation + 1) % 4)
+    elif input_states["b"]["pressed"]:
+        piece_attempt_rotate((piece_rotation + 3) % 4)
 
     insert_piece_tiles()
     timers.append([0.25, update_piece_pos])
@@ -200,6 +207,15 @@ def piece_attempt_move(move_dir):
     piece_pos[1] = piece_pos[1] + move_dir[1]
     return True
 
+# returns true if the rotation was successful
+def piece_attempt_rotate(new_rotation):
+    global piece_rotation
+    for tile in pieces[piece_index][new_rotation]:
+        if tile_collision_check([piece_pos[0] + tile[0], piece_pos[1] + tile[1]]):
+            return False
+    piece_rotation = new_rotation 
+    return True
+    
 # returns true if a collision occured
 def tile_collision_check(tile_pos):
     # if out of bounds or the tile in the play area isn't empty, we have collided
