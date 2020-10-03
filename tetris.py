@@ -39,6 +39,11 @@ colors = [ [0, 0, 0], [0, 206, 241], [255, 213, 0], [145, 56, 167], [114, 203, 5
 
 fps_cap_clock = pygame.time.Clock()
 
+# variables for the currently moving piece
+piece_pos = [0, 0] # relative to the play area
+piece_index = 0
+piece_rotation = 0
+
 # First bool is "is key pressed", second is "is key just pressed", second will update to false 1/60 of a second after the key is pressed
 # For now, just_pressed goes unused
 input_states = \
@@ -65,16 +70,16 @@ input_map = \
 }
 
 # Array of all pieces and all their rotations, stored as offsets in a 4 by 4 grid if an l or O, or a 3 by 3 grid otherwise (follows SRS)
-# Additionally, the 5th value in the list for each piece is the color index
+# Additionally, and the 5th value in the list for each piece is the color index, and the 6th is their start position
 pieces = \
 [
-    [ [ [0, 1], [1, 1], [2, 1], [3, 1] ], [ [2, 0], [2, 1], [2, 2], [2, 3] ], [ [0, 2], [1, 2], [2, 2], [3, 2] ], [ [1, 0], [1, 1], [1, 2], [1, 3] ], 1 ], # l 
-    [ [ [1, 0], [1, 1], [2, 0], [2, 1] ], [ [1, 0], [1, 1], [2, 0], [2, 1] ], [ [1, 0], [1, 1], [2, 0], [2, 1] ], [ [1, 0], [1, 1], [2, 0], [2, 1] ], 2 ], # O
-    [ [ [1, 0], [0, 1], [1, 1], [2, 1] ], [ [1, 0], [1, 1], [1, 2], [2, 1] ], [ [0, 1], [1, 1], [2, 1], [1, 2] ], [ [0, 1], [1, 0], [1, 1], [1, 2] ], 3 ], # T
-    [ [ [1, 0], [2, 0], [0, 1], [1, 1] ], [ [1, 0], [1, 1], [2, 1], [2, 2] ], [ [1, 1], [2, 1], [0, 2], [1, 2] ], [ [0, 0], [0, 1], [1, 1], [1, 2] ], 4 ], # S
-    [ [ [0, 0], [1, 0], [1, 1], [2, 1] ], [ [1, 1], [1, 2], [2, 0], [2, 1] ], [ [0, 1], [1, 1], [1, 2], [2, 2] ], [ [0, 1], [0, 2], [1, 0], [1, 1] ], 5 ], # Z
-    [ [ [0, 0], [0, 1], [1, 1], [2, 1] ], [ [1, 0], [2, 0], [1, 1], [1, 2] ], [ [0, 1], [1, 1], [2, 1], [2, 2] ], [ [0, 2], [1, 0], [1, 1], [1, 2] ], 6 ], # J
-    [ [ [2, 0], [0, 1], [1, 1], [2, 1] ], [ [1, 0], [1, 1], [1, 2], [2, 2] ], [ [0, 1], [1, 1], [2, 1], [0, 2] ], [ [0, 0], [1, 0], [1, 1], [1, 2] ], 7 ]  # L
+    [ [ [0, 1], [1, 1], [2, 1], [3, 1] ], [ [2, 0], [2, 1], [2, 2], [2, 3] ], [ [0, 2], [1, 2], [2, 2], [3, 2] ], [ [1, 0], [1, 1], [1, 2], [1, 3] ], 1, [19, 3] ], # l 
+    [ [ [1, 0], [1, 1], [2, 0], [2, 1] ], [ [1, 0], [1, 1], [2, 0], [2, 1] ], [ [1, 0], [1, 1], [2, 0], [2, 1] ], [ [1, 0], [1, 1], [2, 0], [2, 1] ], 2, [19, 4]], # O
+    [ [ [1, 0], [0, 1], [1, 1], [2, 1] ], [ [1, 0], [1, 1], [1, 2], [2, 1] ], [ [0, 1], [1, 1], [2, 1], [1, 2] ], [ [0, 1], [1, 0], [1, 1], [1, 2] ], 3, [20, 3]], # T
+    [ [ [1, 0], [2, 0], [0, 1], [1, 1] ], [ [1, 0], [1, 1], [2, 1], [2, 2] ], [ [1, 1], [2, 1], [0, 2], [1, 2] ], [ [0, 0], [0, 1], [1, 1], [1, 2] ], 4, [20, 3]], # S
+    [ [ [0, 0], [1, 0], [1, 1], [2, 1] ], [ [1, 1], [1, 2], [2, 0], [2, 1] ], [ [0, 1], [1, 1], [1, 2], [2, 2] ], [ [0, 1], [0, 2], [1, 0], [1, 1] ], 5, [20, 3]], # Z
+    [ [ [0, 0], [0, 1], [1, 1], [2, 1] ], [ [1, 0], [2, 0], [1, 1], [1, 2] ], [ [0, 1], [1, 1], [2, 1], [2, 2] ], [ [0, 2], [1, 0], [1, 1], [1, 2] ], 6, [20, 3]], # J
+    [ [ [2, 0], [0, 1], [1, 1], [2, 1] ], [ [1, 0], [1, 1], [1, 2], [2, 2] ], [ [0, 1], [1, 1], [2, 1], [0, 2] ], [ [0, 0], [1, 0], [1, 1], [1, 2] ], 7, [20, 3]]  # L
 ]
 
 # All game logic initializations go here, so the game can be restarted and such
@@ -133,11 +138,25 @@ def draw():
 
     pygame.display.flip()
 
+# insert tiles for the current piece so it displays on the grid
+def insert_piece_tiles():
+    for tile in pieces[piece_index][piece_rotation]:
+        play_area[piece_pos[0] + tile[0]][piece_pos[1] + tile[1]] = pieces[piece_index][4]
+    
+# remove tiles for the current piece so it can be moved
+def remove_piece_tiles():
+    for tile in pieces[piece_index][piece_rotation]:
+        play_area[piece_pos[0] + tile[0]][piece_pos[1] + tile[1]] = 0
+    
 create_background()
 
 init_game()
 
-play_area[20][4] = 1
+piece_index = 0
+piece_rotation = 3
+piece_pos = pieces[piece_index][5]
+
+insert_piece_tiles()
 
 # Main loop
 while True:
