@@ -89,25 +89,30 @@ pieces = \
 
 # All game logic initializations go here, so the game can be restarted and such
 def init_game():
-    global piece_index, piece_pos, piece_rotation
     create_play_area()
-
     random.seed()
 
+    insert_new_piece()
+
+def insert_new_piece():
+    global piece_index, piece_pos, piece_rotation
+
     piece_index = random.randrange(0, 6)
-    piece_pos = pieces[piece_index][5]
+    piece_pos = pieces[piece_index][5].copy()
     piece_rotation = 0
 
     insert_piece_tiles()
-    update_piece_pos()
+    update_piece_pos(False)
 
 # Draw Background (to be copied to the main screen every frame)
 def create_background():
     background.fill([0, 0, 0, 0])
+    background.lock()
     for col in range(play_area_size[0]):
         for row in range(int(play_area_size[1] / 2)):
             pygame.draw.rect(background, [255, 255, 255], [drawn_grid_pos[0] + col * drawn_tile_size[0], drawn_grid_pos[1] + row * drawn_tile_size[1]] + drawn_tile_size, 1)
     pygame.draw.rect(background, [255, 255, 255], piece_preview_pos + piece_preview_size, 1)
+    background.unlock()
 
 def create_play_area():
     for col in range(play_area_size[0]):
@@ -132,10 +137,13 @@ def update(delta):
     for timer in timers:
         update_timer(delta, timer)
 
-def update_piece_pos():
+def update_piece_pos(lock = True):
     remove_piece_tiles()
 
-    piece_attempt_move([0, 1])
+    if lock and not piece_attempt_move([0, 1]):
+        insert_piece_tiles()
+        insert_new_piece()
+        return
 
     if input_states["right"]["pressed"]:
         piece_attempt_move([1, 0])
@@ -143,7 +151,7 @@ def update_piece_pos():
         piece_attempt_move([-1, 0])
 
     insert_piece_tiles()
-    timers.append([0.5, update_piece_pos])
+    timers.append([0.25, update_piece_pos])
     
 def draw():
     screen.fill(pygame.Color(0, 0, 0))
