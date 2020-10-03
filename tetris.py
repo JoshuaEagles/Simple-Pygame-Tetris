@@ -53,6 +53,8 @@ piece_pos = [0, 0] # relative to the play area
 piece_index = 0
 piece_rotation = 0
 
+next_piece_index = 0
+
 input_states = \
 {
     "left" : False,
@@ -84,22 +86,26 @@ can_rotate = True
 can_rotate_timer = []
 
 # Array of all pieces and all their rotations, stored as offsets in a 4 by 4 grid if an l or O, or a 3 by 3 grid otherwise (follows SRS)
-# Additionally, and the 5th value in the list for each piece is the color index, and the 6th is their start position
+# Additionally, and the 5th value in the list for each piece is the color index, and the 6th is their start position, 7th is piece preview offset in tiles (can be fractional)
 pieces = \
 [
-    [ [ [0, 1], [1, 1], [2, 1], [3, 1] ], [ [2, 0], [2, 1], [2, 2], [2, 3] ], [ [0, 2], [1, 2], [2, 2], [3, 2] ], [ [1, 0], [1, 1], [1, 2], [1, 3] ], 1, [3, 18] ], # l 
-    [ [ [1, 0], [1, 1], [2, 0], [2, 1] ], [ [1, 0], [1, 1], [2, 0], [2, 1] ], [ [1, 0], [1, 1], [2, 0], [2, 1] ], [ [1, 0], [1, 1], [2, 0], [2, 1] ], 2, [4, 18]], # O
-    [ [ [1, 0], [0, 1], [1, 1], [2, 1] ], [ [1, 0], [1, 1], [1, 2], [2, 1] ], [ [0, 1], [1, 1], [2, 1], [1, 2] ], [ [0, 1], [1, 0], [1, 1], [1, 2] ], 3, [3, 19]], # T
-    [ [ [1, 0], [2, 0], [0, 1], [1, 1] ], [ [1, 0], [1, 1], [2, 1], [2, 2] ], [ [1, 1], [2, 1], [0, 2], [1, 2] ], [ [0, 0], [0, 1], [1, 1], [1, 2] ], 4, [3, 19]], # S
-    [ [ [0, 0], [1, 0], [1, 1], [2, 1] ], [ [1, 1], [1, 2], [2, 0], [2, 1] ], [ [0, 1], [1, 1], [1, 2], [2, 2] ], [ [0, 1], [0, 2], [1, 0], [1, 1] ], 5, [3, 19]], # Z
-    [ [ [0, 0], [0, 1], [1, 1], [2, 1] ], [ [1, 0], [2, 0], [1, 1], [1, 2] ], [ [0, 1], [1, 1], [2, 1], [2, 2] ], [ [0, 2], [1, 0], [1, 1], [1, 2] ], 6, [3, 19]], # J
-    [ [ [2, 0], [0, 1], [1, 1], [2, 1] ], [ [1, 0], [1, 1], [1, 2], [2, 2] ], [ [0, 1], [1, 1], [2, 1], [0, 2] ], [ [0, 0], [1, 0], [1, 1], [1, 2] ], 7, [3, 19]]  # L
+    [ [ [0, 1], [1, 1], [2, 1], [3, 1] ], [ [2, 0], [2, 1], [2, 2], [2, 3] ], [ [0, 2], [1, 2], [2, 2], [3, 2] ], [ [1, 0], [1, 1], [1, 2], [1, 3] ], 1, [3, 18], [0.5, 1]], # l 
+    [ [ [1, 0], [1, 1], [2, 0], [2, 1] ], [ [1, 0], [1, 1], [2, 0], [2, 1] ], [ [1, 0], [1, 1], [2, 0], [2, 1] ], [ [1, 0], [1, 1], [2, 0], [2, 1] ], 2, [4, 18], [0.5, 1.5]], # O
+    [ [ [1, 0], [0, 1], [1, 1], [2, 1] ], [ [1, 0], [1, 1], [1, 2], [2, 1] ], [ [0, 1], [1, 1], [2, 1], [1, 2] ], [ [0, 1], [1, 0], [1, 1], [1, 2] ], 3, [3, 19], [1, 1.5]], # T
+    [ [ [1, 0], [2, 0], [0, 1], [1, 1] ], [ [1, 0], [1, 1], [2, 1], [2, 2] ], [ [1, 1], [2, 1], [0, 2], [1, 2] ], [ [0, 0], [0, 1], [1, 1], [1, 2] ], 4, [3, 19], [1, 1.5]], # S
+    [ [ [0, 0], [1, 0], [1, 1], [2, 1] ], [ [1, 1], [1, 2], [2, 0], [2, 1] ], [ [0, 1], [1, 1], [1, 2], [2, 2] ], [ [0, 1], [0, 2], [1, 0], [1, 1] ], 5, [3, 19], [1, 1.5]], # Z
+    [ [ [0, 0], [0, 1], [1, 1], [2, 1] ], [ [1, 0], [2, 0], [1, 1], [1, 2] ], [ [0, 1], [1, 1], [2, 1], [2, 2] ], [ [0, 2], [1, 0], [1, 1], [1, 2] ], 6, [3, 19], [1, 1.5]], # J
+    [ [ [2, 0], [0, 1], [1, 1], [2, 1] ], [ [1, 0], [1, 1], [1, 2], [2, 2] ], [ [0, 1], [1, 1], [2, 1], [0, 2] ], [ [0, 0], [1, 0], [1, 1], [1, 2] ], 7, [3, 19], [1, 1.5]]  # L
 ]
 
 # All game logic initializations go here, so the game can be restarted and such
 def init_game():
+    global next_piece_index
+
     create_play_area()
     random.seed()
+
+    next_piece_index = random.randrange(0, 6)
 
     insert_new_piece()
 
@@ -196,7 +202,18 @@ def draw():
             pygame.draw.rect(screen, tile_color, [drawn_grid_pos[0] + col * drawn_tile_size[0], drawn_grid_pos[1] + row * drawn_tile_size[1]] + drawn_tile_size)
     screen.unlock()
 
-    # Piece Preview - TODO
+    # TODO: move this to a separate screen that only gets redrawn once when a new piece is generated
+    # next piece preview
+    for tile in pieces[next_piece_index][0]:
+        tile_color = colors[pieces[next_piece_index][4]]
+        tile_preview_offset = pieces[next_piece_index][6]
+        tile_x = int(piece_preview_pos[0] + (tile[0] + tile_preview_offset[0]) * drawn_tile_size[0])
+        tile_y = int(piece_preview_pos[1] + (tile[1] + tile_preview_offset[1]) * drawn_tile_size[1])
+        tile_rect = [tile_x, tile_y] + drawn_tile_size
+
+        pygame.draw.rect(screen, tile_color, tile_rect) # filled color
+        pygame.draw.rect(screen, [255, 255, 255], tile_rect, 1) # tile outline
+
 
     # Score, Level, and Lines Cleared - TODO
 
@@ -207,9 +224,10 @@ def draw():
     pygame.display.flip()
 
 def insert_new_piece():
-    global piece_index, piece_pos, piece_rotation
+    global piece_index, piece_pos, piece_rotation, next_piece_index
 
-    piece_index = random.randrange(0, 6)
+    piece_index = next_piece_index
+    next_piece_index = random.randrange(0, 6)
     piece_pos = pieces[piece_index][5].copy()
     piece_rotation = 0
 
