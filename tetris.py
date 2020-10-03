@@ -27,11 +27,11 @@ background = pygame.Surface(window_size)
 # pylint: enable=too-many-function-args
 
 play_area = []
-play_area_size = [40, 10]
+play_area_size = [10, 40]
 
 drawn_grid_pos = [480, 40]
 drawn_tile_size = [32, 32]
-piece_preview_pos = [drawn_grid_pos[0] + (play_area_size[1] + 1) * drawn_tile_size[0], drawn_grid_pos[1]]
+piece_preview_pos = [drawn_grid_pos[0] + (play_area_size[0] + 1) * drawn_tile_size[0], drawn_grid_pos[1]]
 piece_preview_size = [drawn_tile_size[0] * 5, drawn_tile_size[1] * 5]
 piece_preview_center = piece_preview_pos + [piece_preview_size[0] / 2, piece_preview_size[1] / 2]
 
@@ -73,13 +73,13 @@ input_map = \
 # Additionally, and the 5th value in the list for each piece is the color index, and the 6th is their start position
 pieces = \
 [
-    [ [ [0, 1], [1, 1], [2, 1], [3, 1] ], [ [2, 0], [2, 1], [2, 2], [2, 3] ], [ [0, 2], [1, 2], [2, 2], [3, 2] ], [ [1, 0], [1, 1], [1, 2], [1, 3] ], 1, [19, 3] ], # l 
-    [ [ [1, 0], [1, 1], [2, 0], [2, 1] ], [ [1, 0], [1, 1], [2, 0], [2, 1] ], [ [1, 0], [1, 1], [2, 0], [2, 1] ], [ [1, 0], [1, 1], [2, 0], [2, 1] ], 2, [19, 4]], # O
-    [ [ [1, 0], [0, 1], [1, 1], [2, 1] ], [ [1, 0], [1, 1], [1, 2], [2, 1] ], [ [0, 1], [1, 1], [2, 1], [1, 2] ], [ [0, 1], [1, 0], [1, 1], [1, 2] ], 3, [20, 3]], # T
-    [ [ [1, 0], [2, 0], [0, 1], [1, 1] ], [ [1, 0], [1, 1], [2, 1], [2, 2] ], [ [1, 1], [2, 1], [0, 2], [1, 2] ], [ [0, 0], [0, 1], [1, 1], [1, 2] ], 4, [20, 3]], # S
-    [ [ [0, 0], [1, 0], [1, 1], [2, 1] ], [ [1, 1], [1, 2], [2, 0], [2, 1] ], [ [0, 1], [1, 1], [1, 2], [2, 2] ], [ [0, 1], [0, 2], [1, 0], [1, 1] ], 5, [20, 3]], # Z
-    [ [ [0, 0], [0, 1], [1, 1], [2, 1] ], [ [1, 0], [2, 0], [1, 1], [1, 2] ], [ [0, 1], [1, 1], [2, 1], [2, 2] ], [ [0, 2], [1, 0], [1, 1], [1, 2] ], 6, [20, 3]], # J
-    [ [ [2, 0], [0, 1], [1, 1], [2, 1] ], [ [1, 0], [1, 1], [1, 2], [2, 2] ], [ [0, 1], [1, 1], [2, 1], [0, 2] ], [ [0, 0], [1, 0], [1, 1], [1, 2] ], 7, [20, 3]]  # L
+    [ [ [0, 1], [1, 1], [2, 1], [3, 1] ], [ [2, 0], [2, 1], [2, 2], [2, 3] ], [ [0, 2], [1, 2], [2, 2], [3, 2] ], [ [1, 0], [1, 1], [1, 2], [1, 3] ], 1, [3, 19] ], # l 
+    [ [ [1, 0], [1, 1], [2, 0], [2, 1] ], [ [1, 0], [1, 1], [2, 0], [2, 1] ], [ [1, 0], [1, 1], [2, 0], [2, 1] ], [ [1, 0], [1, 1], [2, 0], [2, 1] ], 2, [4, 19]], # O
+    [ [ [1, 0], [0, 1], [1, 1], [2, 1] ], [ [1, 0], [1, 1], [1, 2], [2, 1] ], [ [0, 1], [1, 1], [2, 1], [1, 2] ], [ [0, 1], [1, 0], [1, 1], [1, 2] ], 3, [3, 20]], # T
+    [ [ [1, 0], [2, 0], [0, 1], [1, 1] ], [ [1, 0], [1, 1], [2, 1], [2, 2] ], [ [1, 1], [2, 1], [0, 2], [1, 2] ], [ [0, 0], [0, 1], [1, 1], [1, 2] ], 4, [3, 20]], # S
+    [ [ [0, 0], [1, 0], [1, 1], [2, 1] ], [ [1, 1], [1, 2], [2, 0], [2, 1] ], [ [0, 1], [1, 1], [1, 2], [2, 2] ], [ [0, 1], [0, 2], [1, 0], [1, 1] ], 5, [3, 20]], # Z
+    [ [ [0, 0], [0, 1], [1, 1], [2, 1] ], [ [1, 0], [2, 0], [1, 1], [1, 2] ], [ [0, 1], [1, 1], [2, 1], [2, 2] ], [ [0, 2], [1, 0], [1, 1], [1, 2] ], 6, [3, 20]], # J
+    [ [ [2, 0], [0, 1], [1, 1], [2, 1] ], [ [1, 0], [1, 1], [1, 2], [2, 2] ], [ [0, 1], [1, 1], [2, 1], [0, 2] ], [ [0, 0], [1, 0], [1, 1], [1, 2] ], 7, [3, 20]]  # L
 ]
 
 # All game logic initializations go here, so the game can be restarted and such
@@ -88,16 +88,16 @@ def init_game():
 
 # Draw Background (to be copied to the main screen every frame)
 def create_background():
-    for row in range(int(play_area_size[0] / 2)):
-        for col in range(play_area_size[1]):
+    for col in range(play_area_size[0]):
+        for row in range(int(play_area_size[1] / 2)):
             pygame.draw.rect(background, [255, 255, 255], [drawn_grid_pos[0] + col * drawn_tile_size[0], drawn_grid_pos[1] + row * drawn_tile_size[1]] + drawn_tile_size, 1)
     pygame.draw.rect(background, [255, 255, 255], piece_preview_pos + piece_preview_size, 1)
 
 def create_play_area():
-    for row in range(play_area_size[0]):
+    for col in range(play_area_size[0]):
         play_area.append([])
-        for _col in range(play_area_size[1]):
-            play_area[row].append(0)
+        for _row in range(play_area_size[1]):
+            play_area[col].append(0)
 
 def event_handler():
     for event in pygame.event.get():
@@ -119,9 +119,9 @@ def draw():
     screen.fill(pygame.Color(0, 0, 0))
 
     # Drawing tiles at their location
-    for row in range(int(play_area_size[0] / 2)):
-        for col in range(play_area_size[1]):
-            tile_color_index = play_area[row + 20][col]
+    for col in range(play_area_size[0]):
+        for row in range(int(play_area_size[1] / 2)):
+            tile_color_index = play_area[col][row + 20]
             tile_color = colors[tile_color_index]
             if tile_color_index == 0:
                 continue
@@ -153,7 +153,7 @@ create_background()
 init_game()
 
 piece_index = 0
-piece_rotation = 3
+piece_rotation = 0
 piece_pos = pieces[piece_index][5]
 
 insert_piece_tiles()
