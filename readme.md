@@ -5,8 +5,8 @@ Technically a playable version of Tetris, although mostly developed to learn Pyg
 
 Written with Python 3.8.2 and pygame 1.9.6
 
-References used: 
-[Tetris Guideline](https://tetris.fandom.com/wiki/Tetris_Guideline)
+References used:<br>
+[Tetris Guideline](https://tetris.fandom.com/wiki/Tetris_Guideline)<br>
 [SRS](https://tetris.fandom.com/wiki/SRS)
 
 Current progress:
