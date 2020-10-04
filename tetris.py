@@ -1,4 +1,3 @@
-# TODO: piece preview 
 # TODO: level 
 # TODO: score and line clear count
 import sys
@@ -52,8 +51,11 @@ timers = []
 piece_pos = [0, 0] # relative to the play area
 piece_index = 0
 piece_rotation = 0
-
 next_piece_index = 0
+
+# actual value set in init
+piece_move_down_timer = []
+piece_move_down_delay = 0.5
 
 input_states = \
 {
@@ -83,14 +85,17 @@ input_map = \
 can_shift = True 
 can_shift_timer = []
 can_rotate = True
-can_rotate_timer = []
+
+can_soft_drop = True 
+can_soft_drop_timer = [] 
+can_hard_drop = True 
 
 # Array of all pieces and all their rotations, stored as offsets in a 4 by 4 grid if an l or O, or a 3 by 3 grid otherwise (follows SRS)
 # Additionally, and the 5th value in the list for each piece is the color index, and the 6th is their start position, 7th is piece preview offset in tiles (can be fractional)
 pieces = \
 [
     [ [ [0, 1], [1, 1], [2, 1], [3, 1] ], [ [2, 0], [2, 1], [2, 2], [2, 3] ], [ [0, 2], [1, 2], [2, 2], [3, 2] ], [ [1, 0], [1, 1], [1, 2], [1, 3] ], 1, [3, 18], [0.5, 1]], # l 
-    [ [ [1, 0], [1, 1], [2, 0], [2, 1] ], [ [1, 0], [1, 1], [2, 0], [2, 1] ], [ [1, 0], [1, 1], [2, 0], [2, 1] ], [ [1, 0], [1, 1], [2, 0], [2, 1] ], 2, [4, 18], [0.5, 1.5]], # O
+    [ [ [1, 0], [1, 1], [2, 0], [2, 1] ], [ [1, 0], [1, 1], [2, 0], [2, 1] ], [ [1, 0], [1, 1], [2, 0], [2, 1] ], [ [1, 0], [1, 1], [2, 0], [2, 1] ], 2, [3, 18], [0.5, 1.5]], # O
     [ [ [1, 0], [0, 1], [1, 1], [2, 1] ], [ [1, 0], [1, 1], [1, 2], [2, 1] ], [ [0, 1], [1, 1], [2, 1], [1, 2] ], [ [0, 1], [1, 0], [1, 1], [1, 2] ], 3, [3, 19], [1, 1.5]], # T
     [ [ [1, 0], [2, 0], [0, 1], [1, 1] ], [ [1, 0], [1, 1], [2, 1], [2, 2] ], [ [1, 1], [2, 1], [0, 2], [1, 2] ], [ [0, 0], [0, 1], [1, 1], [1, 2] ], 4, [3, 19], [1, 1.5]], # S
     [ [ [0, 0], [1, 0], [1, 1], [2, 1] ], [ [1, 1], [1, 2], [2, 0], [2, 1] ], [ [0, 1], [1, 1], [1, 2], [2, 2] ], [ [0, 1], [0, 2], [1, 0], [1, 1] ], 5, [3, 19], [1, 1.5]], # Z
@@ -100,12 +105,18 @@ pieces = \
 
 # All game logic initializations go here, so the game can be restarted and such
 def init_game():
-    global next_piece_index
+    global next_piece_index, piece_move_down_timer
+
+    timers.clear()
 
     create_play_area()
     random.seed()
 
     next_piece_index = random.randrange(0, 6)
+
+    move_down_timer_length = 0.5
+    piece_move_down_timer = [move_down_timer_length, move_down_timer_length, update_piece_pos, False]
+    timers.append(piece_move_down_timer)
 
     insert_new_piece()
 
@@ -126,7 +137,7 @@ def create_play_area():
             play_area[col].append(0)
 
 def event_handler():
-    global can_shift, can_rotate
+    global can_shift, can_rotate, can_hard_drop
     for event in pygame.event.get():
         if event.type == QUIT:
             sys.exit()
@@ -138,9 +149,14 @@ def event_handler():
                 # if i had a just pressed system, this code could go elsewhere
                 if pressed_key == "right" or pressed_key == "left":
                     can_shift = True
-                    timers.remove(can_shift_timer)
+                    if can_shift_timer in timers:
+                        timers.remove(can_shift_timer)
+
                 if pressed_key == "a" or pressed_key == "b":
                     can_rotate = True
+
+                if pressed_key == "up":
+                    can_hard_drop = True
 
         elif event.type == KEYUP:
             if event.key in input_map:
@@ -148,33 +164,72 @@ def event_handler():
                 input_states[released_key] = False
 
 def update(delta):
-    global can_shift, can_rotate, can_shift_timer, can_rotate_timer
+    global can_shift, can_rotate, can_shift_timer, can_soft_drop, can_soft_drop_timer, can_hard_drop
 
     for timer in timers:
         update_timer(delta, timer)
 
     remove_piece_tiles()
+
+    # shifting left and right
     if can_shift:
-        if input_states["right"] and can_shift:
+        shifted = False
+        if input_states["right"]:
             piece_attempt_move([1, 0])
-        elif input_states["left"] and can_shift:
+            shifted = True
+        elif input_states["left"]:
             piece_attempt_move([-1, 0])
-        can_shift = False 
-        can_shift_timer = [0.2, 0.2, set_can_shift_true, True]
-        timers.append(can_shift_timer)
+            shifted = True
+
+        if shifted:
+            can_shift = False
+            can_shift_timer = [0.2, 0.2, set_can_shift_true, True]
+            timers.append(can_shift_timer)
+
+    # piece rotation
     if can_rotate:
-        if input_states["a"] and can_rotate:
-            piece_attempt_rotate((piece_rotation + 1) % 4)
-        elif input_states["b"] and can_rotate:
-            piece_attempt_rotate((piece_rotation + 3) % 4)
         can_rotate = False 
+        if input_states["a"]:
+            piece_attempt_rotate((piece_rotation + 1) % 4)
+        elif input_states["b"]:
+            piece_attempt_rotate((piece_rotation + 3) % 4)
+
+    # soft drops 
+    if input_states["down"]:
+        piece_move_down_timer[0] = piece_move_down_delay / 4
+        if piece_move_down_timer[1] > piece_move_down_timer[0]:
+            piece_move_down_timer[1] = piece_move_down_timer[0]
+    else:
+        piece_move_down_timer[0] = piece_move_down_delay
+
+    # hard drops
+    if can_hard_drop and input_states["up"]:
+        # this function is needed because we can't break from an inner loop back to an outer loop
+        def can_place_piece_at_pos(pos):
+            for tile in pieces[piece_index][piece_rotation]:
+                collision_occured = tile_collision_check([pos[0] + tile[0], pos[1] + tile[1]])
+                if collision_occured:
+                    return False
+            return True
+
+        can_hard_drop = False
+
+        for row in range(play_area_size[1], piece_pos[1], -1):
+            can_place = can_place_piece_at_pos([piece_pos[0], row])
+            if can_place:
+                piece_pos[1] = row
+                lock_piece()
+                break
+
     insert_piece_tiles()
+                
 
 # This exists because you can't set variables inside a lambda in python
 def set_can_shift_true():
     global can_shift
     can_shift = True 
 
+# lock is needed so the piece cannot lock when inserting a new piece, or else there would be a stack overflow
 def update_piece_pos(lock = True):
     global piece_rotation
 
@@ -182,25 +237,22 @@ def update_piece_pos(lock = True):
 
     piece_moved_down = piece_attempt_move([0, 1])
     if lock and not piece_moved_down:
-        insert_piece_tiles()
-        attempt_line_clears()
-        insert_new_piece()
+        lock_piece()
         return
 
     insert_piece_tiles()
-    timers.append([0.25, 0.25, update_piece_pos, True])
     
 def draw():
     screen.fill(pygame.Color(0, 0, 0))
 
-    # Drawing tiles at their location
     screen.lock()
+
+    # Drawing tiles in the play area
     for col in range(play_area_size[0]):
         for row in range(int(play_area_size[1] / 2)):
             tile_color_index = play_area[col][row + 20]
             tile_color = colors[tile_color_index]
             pygame.draw.rect(screen, tile_color, [drawn_grid_pos[0] + col * drawn_tile_size[0], drawn_grid_pos[1] + row * drawn_tile_size[1]] + drawn_tile_size)
-    screen.unlock()
 
     # TODO: move this to a separate screen that only gets redrawn once when a new piece is generated
     # next piece preview
@@ -214,6 +266,7 @@ def draw():
         pygame.draw.rect(screen, tile_color, tile_rect) # filled color
         pygame.draw.rect(screen, [255, 255, 255], tile_rect, 1) # tile outline
 
+    screen.unlock()
 
     # Score, Level, and Lines Cleared - TODO
 
@@ -277,6 +330,11 @@ def tile_collision_check(tile_pos):
     if tile_pos[0] > play_area_size[0] - 1 or tile_pos[0] < 0 or tile_pos[1] > play_area_size[1] - 1 or tile_pos[1] < 0:
         return True
     return play_area[tile_pos[0]][tile_pos[1]] != 0
+
+def lock_piece():
+    insert_piece_tiles()
+    attempt_line_clears()
+    insert_new_piece()
 
 # called when locking a piece, checks for line clears, and clears them if found
 def attempt_line_clears():
